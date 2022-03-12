@@ -24,7 +24,7 @@ try:
   socket.connect(clientAddress)
 except:
   pass
-print("connected with Client")
+print("Connected with Client...")
 
 #cv2Trackbar requires an empty function as a paramenter for its callback
 def empty_callback(a):
