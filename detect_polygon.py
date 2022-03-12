@@ -7,9 +7,6 @@ cap = cv2.VideoCapture(2)
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)
 
-def empty(a):
-    pass
-
 cv2.namedWindow("Parameters")
 cv2.resizeWindow("Parameters",640,240)
 cv2.createTrackbar("Threshold1","Parameters",23,255,empty)
