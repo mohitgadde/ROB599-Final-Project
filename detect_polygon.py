@@ -7,11 +7,15 @@ cap = cv2.VideoCapture(2)
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)
 
+#cv2Trackbar requires an empty function as a paramenter for its callback
+def empty_callback(a):
+    pass 
+
 cv2.namedWindow("Parameters")
 cv2.resizeWindow("Parameters",640,240)
-cv2.createTrackbar("Threshold1","Parameters",23,255,empty)
-cv2.createTrackbar("Threshold2","Parameters",20,255,empty)
-cv2.createTrackbar("Area","Parameters",5000,30000,empty)
+cv2.createTrackbar("Threshold1","Parameters",23,255,empty_callback)
+cv2.createTrackbar("Threshold2","Parameters",20,255,empty_callback)
+cv2.createTrackbar("Area","Parameters",5000,30000,empty_callback)
 
 def stackImages(scale,imgArray):
     rows = len(imgArray)
