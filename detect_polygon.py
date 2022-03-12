@@ -1,5 +1,8 @@
 import cv2
 import numpy as np
+import socket 
+import json
+import time
 
 frameWidth = 640
 frameHeight = 480
@@ -7,15 +10,31 @@ cap = cv2.VideoCapture(2)
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)
 
+# serverIP="192.168.91.178" #Mohit's PC IP
+serverIP="127.0.0.1" #localhost
+serverPort=20001
+# clientAddress = ("192.168.91.251", 20001) #ArmPi IP
+clientAddress = ("127.0.0.1", 20001) #localhost
+msgOut = {"edges":None}
+buffersize = 64
+socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+socket.bind((serverIP, serverPort))
+print("UDP Server Starting...")
+try:
+  socket.connect(clientAddress)
+except:
+  pass
+print("connected with Client")
+
 #cv2Trackbar requires an empty function as a paramenter for its callback
 def empty_callback(a):
     pass 
 
 cv2.namedWindow("Parameters")
 cv2.resizeWindow("Parameters",640,240)
-cv2.createTrackbar("Threshold1","Parameters",23,255,empty_callback)
-cv2.createTrackbar("Threshold2","Parameters",20,255,empty_callback)
-cv2.createTrackbar("Area","Parameters",5000,30000,empty_callback)
+cv2.createTrackbar("Threshold1","Parameters",151,255,empty_callback)
+cv2.createTrackbar("Threshold2","Parameters",181,255,empty_callback)
+cv2.createTrackbar("Area","Parameters",14345,30000,empty_callback)
 
 def stackImages(scale,imgArray):
     rows = len(imgArray)
@@ -49,6 +68,7 @@ def stackImages(scale,imgArray):
     return ver
 
 def getContours(img,imgContour):
+    global shape_edge
     contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     for cnt in contours:
         area = cv2.contourArea(cnt)
@@ -57,7 +77,7 @@ def getContours(img,imgContour):
             cv2.drawContours(imgContour, cnt, -1, (255, 0, 255), 7)
             peri = cv2.arcLength(cnt, True)
             approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
-            print(len(approx))
+            msgOut['edges'] = (len(approx))
             x , y , w, h = cv2.boundingRect(approx)
             cv2.rectangle(imgContour, (x , y ), (x + w , y + h ), (0, 255, 0), 5)
 
@@ -65,6 +85,12 @@ def getContours(img,imgContour):
                         (0, 255, 0), 2)
             cv2.putText(imgContour, "Area: " + str(int(area)), (x + w + 20, y + 45), cv2.FONT_HERSHEY_COMPLEX, 0.7,
                         (0, 255, 0), 2)
+    data = json.dumps(msgOut).encode()        
+    try:
+        socket.sendto(data, clientAddress)
+    except:
+        print("Lost connection to the client!")
+    print("Data", data) 
 
 while True:
     success, img = cap.read()
@@ -78,7 +104,7 @@ while True:
     imgDil = cv2.dilate(imgCanny, kernel, iterations=1)
     getContours(imgDil,imgContour)
     imgStack = stackImages(0.8,([img,imgCanny],
-                                [imgDil,imgContour]))
+                                [imgDil,imgContour])) 
     cv2.imshow("Result", imgStack)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
