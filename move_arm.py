@@ -218,7 +218,7 @@ class ArmIK:
             print(e)
             pass
             
-def drawTraingle():
+def drawTriangle():
     print(AK.setPitchRangeMoving((-10, 12, 20), 0, -90, 0, 1000))
     time.sleep(3)
     print(AK.setPitchRangeMoving((-10, 12, 4), 0, -90,0, 1000))
@@ -274,4 +274,10 @@ def drawRectangle():
 if __name__ == "__main__":
     AK = ArmIK()
     camera = Camera()
+
+    if (camera.clientSocket == 3):
+        drawTriangle()
+    elif (camera.clientSocket == 4):
+        drawRectangle()
+
     print("Exit")
